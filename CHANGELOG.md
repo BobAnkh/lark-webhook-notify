@@ -7,4 +7,3 @@ All notable changes to this project will be documented in this file.
 ### Features
 
 - Add main framework of notifier - ([5069fd5](https://github.com/BobAnkh/lark-webhook-notify/commit/5069fd58ce276b4a0a703ecd250c5725f5d7043e))
-

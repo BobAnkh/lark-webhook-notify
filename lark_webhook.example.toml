@@ -1,0 +1,8 @@
+# Example configuration file for lark-webhook-notify
+# Copy this to lark_webhook.toml and fill in your values
+
+# Lark webhook URL from your Lark bot configuration
+webhook_url = "https://open.feishu.cn/open-apis/bot/v2/hook/YOUR_WEBHOOK_URL"
+
+# Lark webhook secret from your Lark bot configuration  
+webhook_secret = "YOUR_WEBHOOK_SECRET"

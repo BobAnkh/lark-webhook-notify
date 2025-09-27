@@ -27,7 +27,8 @@ def get_logger() -> logging.Logger:
 
     Note:
         Logger is configured with INFO level by default. Only one handler
-        is added to prevent duplicate log messages.
+        is added to prevent duplicate log messages. Logger propagation is
+        disabled to prevent duplicate messages from parent loggers.
     """
     formatter = logging.Formatter(
         "%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
@@ -41,6 +42,9 @@ def get_logger() -> logging.Logger:
         console_handler = logging.StreamHandler()
         console_handler.setFormatter(formatter)
         logger.addHandler(console_handler)
+
+    # Prevent propagation to parent loggers to avoid duplicate messages
+    logger.propagate = False
 
     return logger
 

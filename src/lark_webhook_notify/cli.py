@@ -26,7 +26,10 @@ from .convenience import (
 
 def get_logger() -> logging.Logger:
     """Get the configured logger."""
-    return logging.getLogger("lark-webhook-notify")
+    logger = logging.getLogger("lark-webhook-notify")
+    # Ensure propagation is disabled to prevent duplicate messages
+    logger.propagate = False
+    return logger
 
 
 def create_parser() -> argparse.ArgumentParser:

@@ -134,6 +134,7 @@ def create_settings(
             import logging
 
             logger = logging.getLogger("lark-webhook-notify")
+            logger.propagate = False
             logger.warning(
                 f"Custom TOML file not found: {toml_file}. Using default configuration."
             )

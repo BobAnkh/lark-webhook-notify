@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.1..v0.1.2) - 2025-09-27
+
+### Bug Fixes
+
+- *(logger)* Prevent propagate logging to parent logger - ([896d00c](https://github.com/BobAnkh/lark-webhook-notify/commit/896d00c039adf41ceffdaca150233a81de3c5b15))
+
 ## [0.1.1](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.0..v0.1.1) - 2025-09-27
 
 ### Features

@@ -15,7 +15,7 @@ passed to the LarkWebhookNotifier client.
 from typing import Optional, Dict, Any, Literal
 from datetime import datetime
 from abc import ABC, abstractmethod
-from pathlib import Path
+# from pathlib import Path
 
 # Type aliases for better readability
 SeverityLevel = Literal["info", "warning", "error", "critical"]
@@ -36,6 +36,7 @@ TRANSLATIONS: Dict[LanguageCode, Dict[str, str]] = {
         "result_storage": "结果存储",
         "storage_prefix": "存储前缀",
         "result_overview": "结果概览",
+        "running_overview": "运行概览",
         "running": "正在运行",
         "completed": "已成功完成",
         "failed": "失败",
@@ -61,6 +62,7 @@ TRANSLATIONS: Dict[LanguageCode, Dict[str, str]] = {
         "result_storage": "Result Storage",
         "storage_prefix": "Storage Prefix",
         "result_overview": "Result Overview",
+        "running_overview": "Running Overview",
         "running": "Running",
         "completed": "Successfully Completed",
         "failed": "Failed",
@@ -91,60 +93,60 @@ def get_translation(key: str, language: LanguageCode = "zh") -> str:
     return TRANSLATIONS.get(language, TRANSLATIONS["zh"]).get(key, key)
 
 
-def get_task_summary(log_file_path: str) -> str:
-    """Extract task summary from log file (compatible with cauldron format).
-
-    Parses the last few lines of a log file to extract task metrics and
-    format them as a markdown table. This maintains compatibility with
-    the cauldron log file format.
-
-    Args:
-        log_file_path: Path to the log file to parse
-
-    Returns:
-        Markdown table string containing task metrics, or error message
-    """
-    log_path = Path(log_file_path)
-
-    try:
-        if not log_path.exists():
-            return f"Error: Log file not found at {log_path}"
-
-        with log_path.open("r", encoding="utf-8") as f:
-            lines = f.readlines()
-
-        if len(lines) < 10:
-            return "Error: Log file too short to extract summary"
-
-        # Extract relevant lines (last 8 lines, excluding the final 2)
-        relevant_lines = lines[-10:-2]
-
-        markdown_table_rows = ["| 指标 | 样本数 | 误差 |", "|:---|:---|:---|"]
-        for line in relevant_lines:
-            line = line.strip()
-            if not line:
-                continue
-
-            parts = line.split()
-            if len(parts) >= 5:
-                metric = parts[0]
-                sample_count = parts[2]
-                error_info = f"{parts[3]} {parts[4]}"
-                markdown_table_rows.append(
-                    f"| {metric} | {sample_count} | {error_info} |"
-                )
-
-        if len(markdown_table_rows) <= 2:
-            return "No valid metric data found in log file"
-
-        markdown_table = "\n".join(markdown_table_rows)
-
-    except PermissionError:
-        markdown_table = f"Error: Permission denied reading {log_path}"
-    except Exception as e:
-        markdown_table = f"An error occurred while processing log file: {e}"
-
-    return markdown_table
+# def get_task_summary(log_file_path: str) -> str:
+#     """Extract task summary from log file (compatible with cauldron format).
+#
+#     Parses the last few lines of a log file to extract task metrics and
+#     format them as a markdown table. This maintains compatibility with
+#     the cauldron log file format.
+#
+#     Args:
+#         log_file_path: Path to the log file to parse
+#
+#     Returns:
+#         Markdown table string containing task metrics, or error message
+#     """
+#     log_path = Path(log_file_path)
+#
+#     try:
+#         if not log_path.exists():
+#             return f"Error: Log file not found at {log_path}"
+#
+#         with log_path.open("r", encoding="utf-8") as f:
+#             lines = f.readlines()
+#
+#         if len(lines) < 10:
+#             return "Error: Log file too short to extract summary"
+#
+#         # Extract relevant lines (last 8 lines, excluding the final 2)
+#         relevant_lines = lines[-10:-2]
+#
+#         markdown_table_rows = ["| 指标 | 样本数 | 误差 |", "|:---|:---|:---|"]
+#         for line in relevant_lines:
+#             line = line.strip()
+#             if not line:
+#                 continue
+#
+#             parts = line.split()
+#             if len(parts) >= 5:
+#                 metric = parts[0]
+#                 sample_count = parts[2]
+#                 error_info = f"{parts[3]} {parts[4]}"
+#                 markdown_table_rows.append(
+#                     f"| {metric} | {sample_count} | {error_info} |"
+#                 )
+#
+#         if len(markdown_table_rows) <= 2:
+#             return "No valid metric data found in log file"
+#
+#         markdown_table = "\n".join(markdown_table_rows)
+#
+#     except PermissionError:
+#         markdown_table = f"Error: Permission denied reading {log_path}"
+#     except Exception as e:
+#         markdown_table = f"An error occurred while processing log file: {e}"
+#
+#     return markdown_table
 
 
 class LarkTemplate(ABC):
@@ -260,6 +262,7 @@ class StartTaskTemplate(LarkTemplate):
         desc: Optional[str] = None,
         group: Optional[str] = None,
         prefix: Optional[str] = None,
+        msg: Optional[str] = None,
         estimated_duration: Optional[str] = None,
         language: LanguageCode = "zh",
     ):
@@ -278,6 +281,7 @@ class StartTaskTemplate(LarkTemplate):
         self.desc = desc or self._t("no_description")
         self.group = group
         self.prefix = prefix
+        self.msg = msg
         self.estimated_duration = estimated_duration
 
     def generate(self) -> CardContent:
@@ -350,6 +354,41 @@ class StartTaskTemplate(LarkTemplate):
                 "margin": "0px 0px 0px 0px",
             }
             elements.append(task_result_storage)
+        # Result summary (collapsible panel)
+        if self.msg:
+            task_result_summary = {
+                "tag": "collapsible_panel",
+                "expanded": False,
+                "header": {
+                    "title": {
+                        "tag": "markdown",
+                        "content": f"**<font color='grey-800'>{self._t('running_overview')}</font>**",
+                    },
+                    "background_color": "grey-200",
+                    "vertical_align": "center",
+                    "icon": {
+                        "tag": "standard_icon",
+                        "token": "down-small-ccm_outlined",
+                        "color": "",
+                        "size": "16px 16px",
+                    },
+                    "icon_position": "right",
+                    "icon_expanded_angle": -180,
+                },
+                "border": {"color": "grey", "corner_radius": "5px"},
+                "vertical_spacing": "8px",
+                "padding": "8px 8px 8px 8px",
+                "elements": [
+                    {
+                        "tag": "markdown",
+                        "content": f"{self.msg}",
+                        "text_align": "left",
+                        "text_size": "normal_v2",
+                        "margin": "0px 0px 0px 0px",
+                    }
+                ],
+            }
+            elements.append(task_result_summary)
 
         return {
             "schema": "2.0",
@@ -423,13 +462,7 @@ class ReportTaskResultTemplate(LarkTemplate):
         self.prefix = prefix
         self.desc = desc
         self.duration = duration
-
-        # Auto-generate message from log file if not provided
-        if msg is None:
-            log_file_path = f"log-{task_name}.txt"
-            self.msg = get_task_summary(log_file_path)
-        else:
-            self.msg = msg
+        self.msg = msg
 
     def generate(self) -> CardContent:
         """Generate task result notification card."""

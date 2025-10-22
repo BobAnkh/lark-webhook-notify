@@ -31,7 +31,7 @@ def get_logger() -> logging.Logger:
         disabled to prevent duplicate messages from parent loggers.
     """
     formatter = logging.Formatter(
-        "%(asctime)s - %(levelname)s - %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
+        "%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
     )
 
     logger = logging.getLogger("lark-webhook-notify")

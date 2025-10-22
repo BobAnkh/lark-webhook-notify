@@ -5,6 +5,7 @@ from .templates import (
     LegacyTaskTemplate,
     StartTaskTemplate,
     ReportTaskResultTemplate,
+    ReportFailureTaskTemplate,
     SimpleMessageTemplate,
     AlertTemplate,
     RawContentTemplate,
@@ -18,6 +19,7 @@ from .convenience import (
     send_simple_message,
     send_task_start,
     send_task_result,
+    send_task_failure,
 )
 
 __version__ = "0.1.0"
@@ -33,6 +35,7 @@ __all__ = [
     "LegacyTaskTemplate",
     "StartTaskTemplate",
     "ReportTaskResultTemplate",
+    "ReportFailureTaskTemplate",
     "SimpleMessageTemplate",
     "AlertTemplate",
     "RawContentTemplate",
@@ -42,6 +45,7 @@ __all__ = [
     "send_simple_message",
     "send_task_start",
     "send_task_result",
+    "send_task_failure",
     # Types
     "CardContent",
     "SeverityLevel",

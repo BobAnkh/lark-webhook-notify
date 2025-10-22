@@ -1,12 +1,13 @@
 """Template system for Lark webhook notifications.
 
-This module provides six predefined templates for different notification types:
+This module provides seven predefined templates for different notification types:
 1. LegacyTaskTemplate - A legacy template format
 2. StartTaskTemplate - Task start notifications
-3. ReportTaskResultTemplate - Task completion/result notifications
-4. SimpleMessageTemplate - Basic text messages
-5. AlertTemplate - Urgent notifications with severity levels
-6. RawContentTemplate - Direct card content passthrough
+3. ReportTaskResultTemplate - Task success notifications
+4. ReportFailureTaskTemplate - Task failure notifications
+5. SimpleMessageTemplate - Basic text messages
+6. AlertTemplate - Urgent notifications with severity levels
+7. RawContentTemplate - Direct card content passthrough
 
 Each template is a class that can be instantiated with parameters and then
 passed to the LarkWebhookNotifier client.
@@ -198,7 +199,7 @@ class LegacyTaskTemplate(LarkTemplate):
     def __init__(
         self,
         task_name: Optional[str] = None,
-        status: Optional[int] = None,
+        status: int = 0,
         group: Optional[str] = None,
         prefix: Optional[str] = None,
         task_summary: Optional[str] = None,
@@ -208,7 +209,7 @@ class LegacyTaskTemplate(LarkTemplate):
 
         Args:
             task_name: Name of the task being reported
-            status: Task status code (None=running, 0=success, other=failed)
+            status: Task status code (default: 0, 0=success, other=failed)
             group: Storage group identifier for task results
             prefix: Storage path prefix for task results
             task_summary: Markdown table summary of task results
@@ -216,7 +217,7 @@ class LegacyTaskTemplate(LarkTemplate):
         """
         super().__init__(language)
         self.task_name = task_name or self._t("unknown_task")
-        self.status = status or 0
+        self.status = status
         self.group = group or ""
         self.prefix = prefix or ""
         self.task_summary = task_summary or ""
@@ -425,34 +426,35 @@ class StartTaskTemplate(LarkTemplate):
 
 
 class ReportTaskResultTemplate(LarkTemplate):
-    """Template for task completion/result notifications.
+    """Template for task success notifications.
 
-    This template is used to notify about completed tasks with results.
-    It includes collapsible panels for detailed results and supports both
-    success and failure status indicators.
+    This template is used to notify about successfully completed tasks.
+    It always displays in success mode (green color, success status).
     """
 
     def __init__(
         self,
         task_name: str,
-        status: int,
+        status: int = 0,
         group: Optional[str] = None,
         prefix: Optional[str] = None,
         desc: Optional[str] = None,
         msg: Optional[str] = None,
         duration: Optional[str] = None,
+        title: Optional[str] = None,
         language: LanguageCode = "zh",
     ):
         """Initialize task result template.
 
         Args:
             task_name: Name of the completed task
-            status: Task status code (0=success, other=failed)
+            status: Task status code (default: 0, used for display)
             group: Storage group identifier for task results
             prefix: Storage path prefix for task results
             desc: Human-readable task description
-            msg: Custom result message (auto-generated from log if None and file exists)
+            msg: Custom result message
             duration: Task execution duration
+            title: Custom card title (default: uses translation key)
             language: Display language code (default: "zh")
         """
         super().__init__(language)
@@ -463,24 +465,16 @@ class ReportTaskResultTemplate(LarkTemplate):
         self.desc = desc
         self.duration = duration
         self.msg = msg
+        self.title = title
 
     def generate(self) -> CardContent:
         """Generate task result notification card."""
         task_time = datetime.now().strftime("%Y-%m-%d %H:%M")
 
-        # Determine status colors and text
-        if self.status == 0:
-            task_status = (
-                f"<font color='green'> :CheckMark: {self._t('completed')}</font>"
-            )
-            color = "green"
-            head_tag = self._t("success")
-            head_flag = self._t("success")
-        else:
-            task_status = f"<font color='red'> :CrossMark: {self._t('failed')}: {self.status}</font>"
-            color = "red"
-            head_tag = self._t("failure")
-            head_flag = self._t("failure")
+        # Always use success styling
+        task_status = f"<font color='green'> :CheckMark: {self._t('completed')}</font>"
+        color = "green"
+        head_tag = self._t("success")
 
         elements = []
 
@@ -583,6 +577,11 @@ class ReportTaskResultTemplate(LarkTemplate):
             }
             elements.append(task_result_summary)
 
+        # Use custom title or default
+        card_title = (
+            self.title if self.title else f"{self._t('task_completion_notification')}"
+        )
+
         return {
             "schema": "2.0",
             "config": {
@@ -604,7 +603,203 @@ class ReportTaskResultTemplate(LarkTemplate):
             "header": {
                 "title": {
                     "tag": "plain_text",
-                    "content": f"{self._t('task_notification')} - {head_flag}",
+                    "content": card_title,
+                },
+                "subtitle": {"tag": "plain_text", "content": ""},
+                "text_tag_list": [
+                    {
+                        "tag": "text_tag",
+                        "text": {"tag": "plain_text", "content": head_tag},
+                        "color": color,
+                    }
+                ],
+                "template": color,
+                "padding": "12px 8px 12px 8px",
+            },
+        }
+
+
+class ReportFailureTaskTemplate(LarkTemplate):
+    """Template for task failure notifications.
+
+    This template is used to notify about failed tasks.
+    It always displays in failure mode (red color, failure status).
+    """
+
+    def __init__(
+        self,
+        task_name: str,
+        status: int = 0,
+        group: Optional[str] = None,
+        prefix: Optional[str] = None,
+        desc: Optional[str] = None,
+        msg: Optional[str] = None,
+        duration: Optional[str] = None,
+        title: Optional[str] = None,
+        language: LanguageCode = "zh",
+    ):
+        """Initialize task failure template.
+
+        Args:
+            task_name: Name of the failed task
+            status: Task status code (default: 0, used for display)
+            group: Storage group identifier for task results
+            prefix: Storage path prefix for task results
+            desc: Human-readable task description
+            msg: Custom failure message
+            duration: Task execution duration
+            title: Custom card title (default: uses translation key)
+            language: Display language code (default: "zh")
+        """
+        super().__init__(language)
+        self.task_name = task_name
+        self.status = status
+        self.group = group
+        self.prefix = prefix
+        self.desc = desc
+        self.duration = duration
+        self.msg = msg
+        self.title = title
+
+    def generate(self) -> CardContent:
+        """Generate task failure notification card."""
+        task_time = datetime.now().strftime("%Y-%m-%d %H:%M")
+
+        # Always use failure styling
+        task_status = (
+            f"<font color='red'> :CrossMark: {self._t('failed')}: {self.status}</font>"
+        )
+        color = "red"
+        head_tag = self._t("failure")
+
+        elements = []
+
+        # Task metadata element
+        task_desc_text = (
+            f"\n**{self._t('task_description')}：** {self.desc}" if self.desc else ""
+        )
+        duration_text = (
+            f"\n**{self._t('execution_duration')}：** {self.duration}"
+            if self.duration
+            else ""
+        )
+        task_metadata = {
+            "tag": "markdown",
+            "content": f"**{self._t('task_name')}：** {self.task_name}\n**{self._t('completion_time')}：** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}：** {task_status}",
+            "text_align": "left",
+            "text_size": "normal",
+            "margin": "0px 0px 0px 0px",
+        }
+        elements.append(task_metadata)
+
+        # Storage information if provided
+        if self.group or self.prefix:
+            task_result_storage = {
+                "tag": "column_set",
+                "background_style": "grey-100",
+                "horizontal_spacing": "12px",
+                "horizontal_align": "left",
+                "columns": [
+                    {
+                        "tag": "column",
+                        "width": "auto",
+                        "elements": [
+                            {
+                                "tag": "markdown",
+                                "content": f"**{self._t('group')}**\n{self.group or ''}",
+                                "text_align": "center",
+                                "text_size": "normal_v2",
+                                "margin": "0px 4px 0px 4px",
+                            }
+                        ],
+                        "vertical_spacing": "8px",
+                        "horizontal_align": "left",
+                        "vertical_align": "top",
+                    },
+                    {
+                        "tag": "column",
+                        "width": "weighted",
+                        "elements": [
+                            {
+                                "tag": "markdown",
+                                "content": f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
+                                "text_align": "center",
+                                "text_size": "normal_v2",
+                            }
+                        ],
+                        "vertical_spacing": "8px",
+                        "horizontal_align": "left",
+                        "vertical_align": "top",
+                        "weight": 1,
+                    },
+                ],
+                "margin": "0px 0px 0px 0px",
+            }
+            elements.append(task_result_storage)
+
+        # Result summary (collapsible panel)
+        if self.msg:
+            task_result_summary = {
+                "tag": "collapsible_panel",
+                "expanded": False,
+                "header": {
+                    "title": {
+                        "tag": "markdown",
+                        "content": f"**<font color='grey-800'>{self._t('result_overview')}</font>**",
+                    },
+                    "background_color": "grey-200",
+                    "vertical_align": "center",
+                    "icon": {
+                        "tag": "standard_icon",
+                        "token": "down-small-ccm_outlined",
+                        "color": "",
+                        "size": "16px 16px",
+                    },
+                    "icon_position": "right",
+                    "icon_expanded_angle": -180,
+                },
+                "border": {"color": "grey", "corner_radius": "5px"},
+                "vertical_spacing": "8px",
+                "padding": "8px 8px 8px 8px",
+                "elements": [
+                    {
+                        "tag": "markdown",
+                        "content": f"{self.msg}",
+                        "text_align": "left",
+                        "text_size": "normal_v2",
+                        "margin": "0px 0px 0px 0px",
+                    }
+                ],
+            }
+            elements.append(task_result_summary)
+
+        # Use custom title or default
+        card_title = (
+            self.title if self.title else f"{self._t('task_failure_notification')}"
+        )
+
+        return {
+            "schema": "2.0",
+            "config": {
+                "update_multi": True,
+                "style": {
+                    "text_size": {
+                        "normal_v2": {
+                            "default": "normal",
+                            "pc": "normal",
+                            "mobile": "heading",
+                        }
+                    }
+                },
+            },
+            "body": {
+                "direction": "vertical",
+                "elements": elements,
+            },
+            "header": {
+                "title": {
+                    "tag": "plain_text",
+                    "content": card_title,
                 },
                 "subtitle": {"tag": "plain_text", "content": ""},
                 "text_tag_list": [

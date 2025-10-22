@@ -12,6 +12,7 @@ from .templates import (
     LegacyTaskTemplate,
     StartTaskTemplate,
     ReportTaskResultTemplate,
+    ReportFailureTaskTemplate,
     SimpleMessageTemplate,
     AlertTemplate,
     SeverityLevel,
@@ -88,9 +89,21 @@ def send_task_notification(
             estimated_duration=duration,
             language=language,
         )
-    else:
-        # Task has completed (success or failure)
+    elif status == 0:
+        # Task has completed successfully
         template = ReportTaskResultTemplate(
+            task_name=task_name,
+            status=status,
+            group=group,
+            prefix=prefix,
+            desc=desc,
+            msg=msg,
+            duration=duration,
+            language=language,
+        )
+    else:
+        # Task has failed
+        template = ReportFailureTaskTemplate(
             task_name=task_name,
             status=status,
             group=group,
@@ -249,26 +262,28 @@ def send_task_start(
 
 def send_task_result(
     task_name: str,
-    status: int,
+    status: int = 0,
     group: Optional[str] = None,
     prefix: Optional[str] = None,
     desc: Optional[str] = None,
     msg: Optional[str] = None,
     duration: Optional[str] = None,
+    title: Optional[str] = None,
     language: LanguageCode = "zh",
     webhook_url: Optional[str] = None,
     webhook_secret: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Send a task result notification.
+    """Send a task success notification.
 
     Args:
         task_name: Name of the completed task
-        status: Task status code (0=success, other=failed)
+        status: Task status code (default: 0, used for display)
         group: Storage group identifier for task results
         prefix: Storage path prefix for task results
         desc: Human-readable task description
-        msg: Custom result message (auto-generated from log if None)
+        msg: Custom result message
         duration: Task execution duration
+        title: Custom card title (default: uses translation key)
         language: Display language code (default: "zh")
         webhook_url: Override configured webhook URL
         webhook_secret: Override configured webhook secret
@@ -279,7 +294,6 @@ def send_task_result(
     Example:
         >>> send_task_result(
         ...     "data-processing",
-        ...     status=0,
         ...     desc="Daily analytics processing",
         ...     duration="25 minutes",
         ...     msg="Processed 1.2M records successfully"
@@ -293,6 +307,65 @@ def send_task_result(
         desc=desc,
         msg=msg,
         duration=duration,
+        title=title,
+        language=language,
+    )
+
+    with LarkWebhookNotifier(
+        webhook_url=webhook_url, webhook_secret=webhook_secret
+    ) as notifier:
+        return notifier.send_template(template)
+
+
+def send_task_failure(
+    task_name: str,
+    status: int = 0,
+    group: Optional[str] = None,
+    prefix: Optional[str] = None,
+    desc: Optional[str] = None,
+    msg: Optional[str] = None,
+    duration: Optional[str] = None,
+    title: Optional[str] = None,
+    language: LanguageCode = "zh",
+    webhook_url: Optional[str] = None,
+    webhook_secret: Optional[str] = None,
+) -> Dict[str, Any]:
+    """Send a task failure notification.
+
+    Args:
+        task_name: Name of the failed task
+        status: Task status code (default: 0, used for display)
+        group: Storage group identifier for task results
+        prefix: Storage path prefix for task results
+        desc: Human-readable task description
+        msg: Custom failure message
+        duration: Task execution duration
+        title: Custom card title (default: uses translation key)
+        language: Display language code (default: "zh")
+        webhook_url: Override configured webhook URL
+        webhook_secret: Override configured webhook secret
+
+    Returns:
+        Response dictionary from the webhook API
+
+    Example:
+        >>> send_task_failure(
+        ...     "data-processing",
+        ...     status=1,
+        ...     desc="Daily analytics processing",
+        ...     duration="5 minutes",
+        ...     msg="Failed to connect to database"
+        ... )
+    """
+    template = ReportFailureTaskTemplate(
+        task_name=task_name,
+        status=status,
+        group=group,
+        prefix=prefix,
+        desc=desc,
+        msg=msg,
+        duration=duration,
+        title=title,
         language=language,
     )
 

@@ -2,6 +2,12 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.3](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.2..v0.1.3) - 2025-10-22
+
+### Features
+
+- *(templates)* Seperate sucess and failure templates - ([df8a004](https://github.com/BobAnkh/lark-webhook-notify/commit/df8a004b783435ab09c22e61f91d83cbc29e3434))
+
 ## [0.1.2](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.1..v0.1.2) - 2025-09-27
 
 ### Bug Fixes

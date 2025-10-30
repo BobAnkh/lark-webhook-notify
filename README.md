@@ -144,6 +144,55 @@ settings = create_settings(
 | `alert`   | Severity-based styling                                         |
 | `raw`     | Raw card content passthrough                                   |
 
+## Blocks-Based Template Composition
+
+To make building and customizing templates easier, the library provides a small set of reusable block helpers in `lark_webhook_notify.blocks`. Each function returns a dict matching Lark’s interactive card schema, and templates compose these blocks to form a complete card.
+
+Blocks to use:
+
+- `markdown(content, text_align='left', text_size='normal', margin='0px 0px 0px 0px')`
+- `column(elements, width='auto', vertical_spacing='8px', horizontal_align='left', vertical_align='top', weight=None)`
+- `column_set(columns, background_style='grey-100', horizontal_spacing='12px', horizontal_align='left', margin='0px 0px 0px 0px')`
+- `collapsible_panel(title_markdown_content, elements, expanded=False, background_color='grey-200', border_color='grey', corner_radius='5px', vertical_spacing='8px', padding='8px 8px 8px 8px')`
+- `header(title=..., template=..., subtitle=None, text_tag_list=None, padding=None)`
+- `text_tag(text, color)`
+- `config_textsize_normal_v2()`
+- `card(elements=[...], header=..., schema='2.0', config=None)`
+- `template_reference(template_id=..., template_version_name=..., template_variable={...})`
+
+Example usage:
+
+```python
+from lark_webhook_notify.blocks import (
+    markdown, column, column_set, collapsible_panel,
+    header, card, text_tag, config_textsize_normal_v2,
+)
+
+elements = [
+    markdown("Task metadata here..."),
+    column_set([
+        column([markdown("**Group**\nartifacts", text_align="center", text_size="normal_v2")], width="auto"),
+        column([markdown("**Prefix**\ns3://bucket/path", text_align="center", text_size="normal_v2")], width="weighted", weight=1),
+    ]),
+    collapsible_panel(
+        title_markdown_content="**<font color='grey-800'>Result Overview</font>**",
+        elements=[markdown("- OK\n- Done", text_size="normal_v2")],
+        expanded=False,
+    ),
+]
+
+hdr = header(
+    title="Task Completion Notification",
+    subtitle="",
+    template="green",
+    text_tag_list=[text_tag("Completed", "green")],
+)
+
+content = card(elements=elements, header=hdr, schema='2.0', config=config_textsize_normal_v2())
+```
+
+You can send this `content` via `LarkWebhookNotifier.send_raw_content`. Built-in templates internally use these blocks, so extending or writing new templates is straightforward.
+
 ### Debug Mode
 
 Enable debug logging for detailed information:

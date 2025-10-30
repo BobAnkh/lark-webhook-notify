@@ -160,3 +160,8 @@ ignore_tags = "rc"
 topo_order = false
 # sort the commits inside sections by oldest/newest order
 sort_commits = "newest"
+
+[dependency-groups]
+dev = [
+    "pytest>=8.4.2",
+]

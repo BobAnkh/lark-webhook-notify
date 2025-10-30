@@ -16,6 +16,17 @@ passed to the LarkWebhookNotifier client.
 from typing import Optional, Dict, Any, Literal
 from datetime import datetime
 from abc import ABC, abstractmethod
+from .blocks import (
+    markdown as md,
+    column_set as colset,
+    column as col,
+    collapsible_panel as panel,
+    card as make_card,
+    header as make_header,
+    text_tag,
+    config_textsize_normal_v2,
+    template_reference,
+)
 # from pathlib import Path
 
 # Type aliases for better readability
@@ -232,22 +243,18 @@ class LegacyTaskTemplate(LarkTemplate):
             task_status = (
                 f"<font color='green'> :CheckMark: {self._t('completed')}</font>"
             )
-
-        return {
-            "type": "template",
-            "data": {
-                "template_id": "AAqz08XD5HCzP",
-                "template_version_name": "1.0.3",
-                "template_variable": {
-                    "task_name": self.task_name,
-                    "task_time": task_time,
-                    "attachment_group": self.group,
-                    "attachment_prefix": self.prefix,
-                    "task_summary": self.task_summary,
-                    "task_status": task_status,
-                },
+        return template_reference(
+            template_id="AAqz08XD5HCzP",
+            template_version_name="1.0.3",
+            template_variable={
+                "task_name": self.task_name,
+                "task_time": task_time,
+                "attachment_group": self.group,
+                "attachment_prefix": self.prefix,
+                "task_summary": self.task_summary,
+                "task_status": task_status,
             },
-        }
+        )
 
 
 class StartTaskTemplate(LarkTemplate):
@@ -302,127 +309,81 @@ class StartTaskTemplate(LarkTemplate):
             f"<font color='wathet-400'> :StatusInFlight: {self._t('running')}</font>"
         )
 
-        task_metadata = {
-            "tag": "markdown",
-            "content": f"**{self._t('task_name')}:** {self.task_name}\n**{self._t('start_time')}:** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}:** {task_status}",
-            "text_align": "left",
-            "text_size": "normal",
-            "margin": "0px 0px 0px 0px",
-        }
-        elements.append(task_metadata)
+        elements.append(
+            md(
+                f"**{self._t('task_name')}:** {self.task_name}\n**{self._t('start_time')}:** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}:** {task_status}",
+                text_align="left",
+                text_size="normal",
+                margin="0px 0px 0px 0px",
+            )
+        )
 
         # Storage information if provided
         if self.group or self.prefix:
-            task_result_storage = {
-                "tag": "column_set",
-                "background_style": "grey-100",
-                "horizontal_spacing": "12px",
-                "horizontal_align": "left",
-                "columns": [
-                    {
-                        "tag": "column",
-                        "width": "auto",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('result_storage')}**\n{self.group or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                                "margin": "0px 4px 0px 4px",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                    },
-                    {
-                        "tag": "column",
-                        "width": "weighted",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                        "weight": 1,
-                    },
-                ],
-                "margin": "0px 0px 0px 0px",
-            }
-            elements.append(task_result_storage)
+            elements.append(
+                colset(
+                    [
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('result_storage')}**\n{self.group or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                    margin="0px 4px 0px 4px",
+                                )
+                            ],
+                            width="auto",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                        ),
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                )
+                            ],
+                            width="weighted",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                            weight=1,
+                        ),
+                    ],
+                    background_style="grey-100",
+                    horizontal_spacing="12px",
+                    horizontal_align="left",
+                    margin="0px 0px 0px 0px",
+                )
+            )
         # Result summary (collapsible panel)
         if self.msg:
-            task_result_summary = {
-                "tag": "collapsible_panel",
-                "expanded": False,
-                "header": {
-                    "title": {
-                        "tag": "markdown",
-                        "content": f"**<font color='grey-800'>{self._t('running_overview')}</font>**",
-                    },
-                    "background_color": "grey-200",
-                    "vertical_align": "center",
-                    "icon": {
-                        "tag": "standard_icon",
-                        "token": "down-small-ccm_outlined",
-                        "color": "",
-                        "size": "16px 16px",
-                    },
-                    "icon_position": "right",
-                    "icon_expanded_angle": -180,
-                },
-                "border": {"color": "grey", "corner_radius": "5px"},
-                "vertical_spacing": "8px",
-                "padding": "8px 8px 8px 8px",
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": f"{self.msg}",
-                        "text_align": "left",
-                        "text_size": "normal_v2",
-                        "margin": "0px 0px 0px 0px",
-                    }
-                ],
-            }
-            elements.append(task_result_summary)
+            elements.append(
+                panel(
+                    f"**<font color='grey-800'>{self._t('running_overview')}</font>**",
+                    [
+                        md(
+                            f"{self.msg}",
+                            text_align="left",
+                            text_size="normal_v2",
+                            margin="0px 0px 0px 0px",
+                        )
+                    ],
+                    expanded=False,
+                )
+            )
 
-        return {
-            "schema": "2.0",
-            "config": {
-                "update_multi": True,
-                "style": {
-                    "text_size": {
-                        "normal_v2": {
-                            "default": "normal",
-                            "pc": "normal",
-                            "mobile": "heading",
-                        }
-                    }
-                },
-            },
-            "body": {
-                "direction": "vertical",
-                "elements": elements,
-            },
-            "header": {
-                "title": {"tag": "plain_text", "content": self._t("task_notification")},
-                "subtitle": {"tag": "plain_text", "content": ""},
-                "text_tag_list": [
-                    {
-                        "tag": "text_tag",
-                        "text": {"tag": "plain_text", "content": self._t("running")},
-                        "color": "wathet",
-                    }
-                ],
-                "template": "wathet",
-                "padding": "12px 8px 12px 8px",
-            },
-        }
+        hdr = make_header(
+            title=self._t("task_notification"),
+            subtitle="",
+            text_tag_list=[text_tag(self._t("running"), "wathet")],
+            template="wathet",
+            padding="12px 8px 12px 8px",
+        )
+        cfg = config_textsize_normal_v2()
+        return make_card(elements=elements, header=hdr, schema="2.0", config=cfg)
 
 
 class ReportTaskResultTemplate(LarkTemplate):
@@ -487,136 +448,87 @@ class ReportTaskResultTemplate(LarkTemplate):
             if self.duration
             else ""
         )
-        task_metadata = {
-            "tag": "markdown",
-            "content": f"**{self._t('task_name')}：** {self.task_name}\n**{self._t('completion_time')}：** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}：** {task_status}",
-            "text_align": "left",
-            "text_size": "normal",
-            "margin": "0px 0px 0px 0px",
-        }
-        elements.append(task_metadata)
+        elements.append(
+            md(
+                f"**{self._t('task_name')}：** {self.task_name}\n**{self._t('completion_time')}：** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}：** {task_status}",
+                text_align="left",
+                text_size="normal",
+                margin="0px 0px 0px 0px",
+            )
+        )
 
         # Storage information if provided
         if self.group or self.prefix:
-            task_result_storage = {
-                "tag": "column_set",
-                "background_style": "grey-100",
-                "horizontal_spacing": "12px",
-                "horizontal_align": "left",
-                "columns": [
-                    {
-                        "tag": "column",
-                        "width": "auto",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('group')}**\n{self.group or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                                "margin": "0px 4px 0px 4px",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                    },
-                    {
-                        "tag": "column",
-                        "width": "weighted",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                        "weight": 1,
-                    },
-                ],
-                "margin": "0px 0px 0px 0px",
-            }
-            elements.append(task_result_storage)
+            elements.append(
+                colset(
+                    [
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('group')}**\n{self.group or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                    margin="0px 4px 0px 4px",
+                                )
+                            ],
+                            width="auto",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                        ),
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                )
+                            ],
+                            width="weighted",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                            weight=1,
+                        ),
+                    ],
+                    background_style="grey-100",
+                    horizontal_spacing="12px",
+                    horizontal_align="left",
+                    margin="0px 0px 0px 0px",
+                )
+            )
 
         # Result summary (collapsible panel)
         if self.msg:
-            task_result_summary = {
-                "tag": "collapsible_panel",
-                "expanded": False,
-                "header": {
-                    "title": {
-                        "tag": "markdown",
-                        "content": f"**<font color='grey-800'>{self._t('result_overview')}</font>**",
-                    },
-                    "background_color": "grey-200",
-                    "vertical_align": "center",
-                    "icon": {
-                        "tag": "standard_icon",
-                        "token": "down-small-ccm_outlined",
-                        "color": "",
-                        "size": "16px 16px",
-                    },
-                    "icon_position": "right",
-                    "icon_expanded_angle": -180,
-                },
-                "border": {"color": "grey", "corner_radius": "5px"},
-                "vertical_spacing": "8px",
-                "padding": "8px 8px 8px 8px",
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": f"{self.msg}",
-                        "text_align": "left",
-                        "text_size": "normal_v2",
-                        "margin": "0px 0px 0px 0px",
-                    }
-                ],
-            }
-            elements.append(task_result_summary)
+            elements.append(
+                panel(
+                    f"**<font color='grey-800'>{self._t('result_overview')}</font>**",
+                    [
+                        md(
+                            f"{self.msg}",
+                            text_align="left",
+                            text_size="normal_v2",
+                            margin="0px 0px 0px 0px",
+                        )
+                    ],
+                    expanded=False,
+                )
+            )
 
         # Use custom title or default
         card_title = (
             self.title if self.title else f"{self._t('task_completion_notification')}"
         )
 
-        return {
-            "schema": "2.0",
-            "config": {
-                "update_multi": True,
-                "style": {
-                    "text_size": {
-                        "normal_v2": {
-                            "default": "normal",
-                            "pc": "normal",
-                            "mobile": "heading",
-                        }
-                    }
-                },
-            },
-            "body": {
-                "direction": "vertical",
-                "elements": elements,
-            },
-            "header": {
-                "title": {
-                    "tag": "plain_text",
-                    "content": card_title,
-                },
-                "subtitle": {"tag": "plain_text", "content": ""},
-                "text_tag_list": [
-                    {
-                        "tag": "text_tag",
-                        "text": {"tag": "plain_text", "content": head_tag},
-                        "color": color,
-                    }
-                ],
-                "template": color,
-                "padding": "12px 8px 12px 8px",
-            },
-        }
+        hdr = make_header(
+            title=card_title,
+            subtitle="",
+            text_tag_list=[text_tag(head_tag, color)],
+            template=color,
+            padding="12px 8px 12px 8px",
+        )
+        cfg = config_textsize_normal_v2()
+        return make_card(elements=elements, header=hdr, schema="2.0", config=cfg)
 
 
 class ReportFailureTaskTemplate(LarkTemplate):
@@ -683,136 +595,87 @@ class ReportFailureTaskTemplate(LarkTemplate):
             if self.duration
             else ""
         )
-        task_metadata = {
-            "tag": "markdown",
-            "content": f"**{self._t('task_name')}：** {self.task_name}\n**{self._t('completion_time')}：** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}：** {task_status}",
-            "text_align": "left",
-            "text_size": "normal",
-            "margin": "0px 0px 0px 0px",
-        }
-        elements.append(task_metadata)
+        elements.append(
+            md(
+                f"**{self._t('task_name')}：** {self.task_name}\n**{self._t('completion_time')}：** {task_time}{task_desc_text}{duration_text}\n**{self._t('execution_status')}：** {task_status}",
+                text_align="left",
+                text_size="normal",
+                margin="0px 0px 0px 0px",
+            )
+        )
 
         # Storage information if provided
         if self.group or self.prefix:
-            task_result_storage = {
-                "tag": "column_set",
-                "background_style": "grey-100",
-                "horizontal_spacing": "12px",
-                "horizontal_align": "left",
-                "columns": [
-                    {
-                        "tag": "column",
-                        "width": "auto",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('group')}**\n{self.group or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                                "margin": "0px 4px 0px 4px",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                    },
-                    {
-                        "tag": "column",
-                        "width": "weighted",
-                        "elements": [
-                            {
-                                "tag": "markdown",
-                                "content": f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
-                                "text_align": "center",
-                                "text_size": "normal_v2",
-                            }
-                        ],
-                        "vertical_spacing": "8px",
-                        "horizontal_align": "left",
-                        "vertical_align": "top",
-                        "weight": 1,
-                    },
-                ],
-                "margin": "0px 0px 0px 0px",
-            }
-            elements.append(task_result_storage)
+            elements.append(
+                colset(
+                    [
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('group')}**\n{self.group or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                    margin="0px 4px 0px 4px",
+                                )
+                            ],
+                            width="auto",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                        ),
+                        col(
+                            [
+                                md(
+                                    f"**{self._t('storage_prefix')}**\n{self.prefix or ''}",
+                                    text_align="center",
+                                    text_size="normal_v2",
+                                )
+                            ],
+                            width="weighted",
+                            vertical_spacing="8px",
+                            horizontal_align="left",
+                            vertical_align="top",
+                            weight=1,
+                        ),
+                    ],
+                    background_style="grey-100",
+                    horizontal_spacing="12px",
+                    horizontal_align="left",
+                    margin="0px 0px 0px 0px",
+                )
+            )
 
         # Result summary (collapsible panel)
         if self.msg:
-            task_result_summary = {
-                "tag": "collapsible_panel",
-                "expanded": False,
-                "header": {
-                    "title": {
-                        "tag": "markdown",
-                        "content": f"**<font color='grey-800'>{self._t('result_overview')}</font>**",
-                    },
-                    "background_color": "grey-200",
-                    "vertical_align": "center",
-                    "icon": {
-                        "tag": "standard_icon",
-                        "token": "down-small-ccm_outlined",
-                        "color": "",
-                        "size": "16px 16px",
-                    },
-                    "icon_position": "right",
-                    "icon_expanded_angle": -180,
-                },
-                "border": {"color": "grey", "corner_radius": "5px"},
-                "vertical_spacing": "8px",
-                "padding": "8px 8px 8px 8px",
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": f"{self.msg}",
-                        "text_align": "left",
-                        "text_size": "normal_v2",
-                        "margin": "0px 0px 0px 0px",
-                    }
-                ],
-            }
-            elements.append(task_result_summary)
+            elements.append(
+                panel(
+                    f"**<font color='grey-800'>{self._t('result_overview')}</font>**",
+                    [
+                        md(
+                            f"{self.msg}",
+                            text_align="left",
+                            text_size="normal_v2",
+                            margin="0px 0px 0px 0px",
+                        )
+                    ],
+                    expanded=False,
+                )
+            )
 
         # Use custom title or default
         card_title = (
             self.title if self.title else f"{self._t('task_failure_notification')}"
         )
 
-        return {
-            "schema": "2.0",
-            "config": {
-                "update_multi": True,
-                "style": {
-                    "text_size": {
-                        "normal_v2": {
-                            "default": "normal",
-                            "pc": "normal",
-                            "mobile": "heading",
-                        }
-                    }
-                },
-            },
-            "body": {
-                "direction": "vertical",
-                "elements": elements,
-            },
-            "header": {
-                "title": {
-                    "tag": "plain_text",
-                    "content": card_title,
-                },
-                "subtitle": {"tag": "plain_text", "content": ""},
-                "text_tag_list": [
-                    {
-                        "tag": "text_tag",
-                        "text": {"tag": "plain_text", "content": head_tag},
-                        "color": color,
-                    }
-                ],
-                "template": color,
-                "padding": "12px 8px 12px 8px",
-            },
-        }
+        hdr = make_header(
+            title=card_title,
+            subtitle="",
+            text_tag_list=[text_tag(head_tag, color)],
+            template=color,
+            padding="12px 8px 12px 8px",
+        )
+        cfg = config_textsize_normal_v2()
+        return make_card(elements=elements, header=hdr, schema="2.0", config=cfg)
 
 
 class SimpleMessageTemplate(LarkTemplate):
@@ -844,24 +707,11 @@ class SimpleMessageTemplate(LarkTemplate):
 
     def generate(self) -> CardContent:
         """Generate simple message card."""
-        return {
-            "schema": "2.0",
-            "body": {
-                "direction": "vertical",
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": self.content,
-                        "text_align": "left",
-                        "text_size": "normal",
-                    }
-                ],
-            },
-            "header": {
-                "title": {"tag": "plain_text", "content": self.title},
-                "template": self.color,
-            },
-        }
+        return make_card(
+            elements=[md(self.content, text_align="left", text_size="normal")],
+            header=make_header(title=self.title, template=self.color),
+            schema="2.0",
+        )
 
 
 class AlertTemplate(LarkTemplate):
@@ -924,32 +774,22 @@ class AlertTemplate(LarkTemplate):
         color = color_map[self.severity]
         icon = icon_map[self.severity]
 
-        return {
-            "schema": "2.0",
-            "body": {
-                "direction": "vertical",
-                "elements": [
-                    {
-                        "tag": "markdown",
-                        "content": f"{icon} **{self.alert_message}**\n\n**{self._t('timestamp')}：** {self.timestamp}",
-                        "text_align": "left",
-                        "text_size": "normal",
-                    }
-                ],
-            },
-            "header": {
-                "title": {"tag": "plain_text", "content": self.alert_title},
-                "subtitle": {"tag": "plain_text", "content": self.severity.upper()},
-                "template": color,
-                "text_tag_list": [
-                    {
-                        "tag": "text_tag",
-                        "text": {"tag": "plain_text", "content": self.severity.upper()},
-                        "color": color,
-                    }
-                ],
-            },
-        }
+        return make_card(
+            elements=[
+                md(
+                    f"{icon} **{self.alert_message}**\n\n**{self._t('timestamp')}：** {self.timestamp}",
+                    text_align="left",
+                    text_size="normal",
+                )
+            ],
+            header=make_header(
+                title=self.alert_title,
+                subtitle=self.severity.upper(),
+                template=color,
+                text_tag_list=[text_tag(self.severity.upper(), color)],
+            ),
+            schema="2.0",
+        )
 
 
 class RawContentTemplate(LarkTemplate):

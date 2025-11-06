@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.2.0](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.3..v0.2.0) - 2025-11-06
+
+### Features
+
+- *(templates)* Add workflow templates and chain-building - ([65b4d6f](https://github.com/BobAnkh/lark-webhook-notify/commit/65b4d6f1b0c3635545111a74cbceb39ba4a24e04))
+
+### Refactor
+
+- Support block-wise building logic for templates - ([ac2ac26](https://github.com/BobAnkh/lark-webhook-notify/commit/ac2ac26aa20611c18c577af3fb9af53200846212))
+
+## New Contributors
+
+- @BobAnkh made their first contribution
 ## [0.1.3](https://github.com/BobAnkh/lark-webhook-notify/compare/v0.1.2..v0.1.3) - 2025-10-22
 
 ### Features
@@ -30,3 +43,6 @@ All notable changes to this project will be documented in this file.
 
 - Add main framework of notifier - ([5069fd5](https://github.com/BobAnkh/lark-webhook-notify/commit/5069fd58ce276b4a0a703ecd250c5725f5d7043e))
 
+## New Contributors
+
+- @BobAnkh made their first contribution

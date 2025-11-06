@@ -38,10 +38,10 @@ LanguageCode = Literal["zh", "en"]
 # Translation dictionaries
 TRANSLATIONS: Dict[LanguageCode, Dict[str, str]] = {
     "zh": {
-        "task_name": "任务名称",
+        "task_name": "作业名称",
         "start_time": "开始时间",
         "completion_time": "完成时间",
-        "task_description": "任务描述",
+        "task_description": "作业描述",
         "estimated_duration": "预计用时",
         "execution_duration": "执行时长",
         "execution_status": "执行状态",
@@ -49,25 +49,71 @@ TRANSLATIONS: Dict[LanguageCode, Dict[str, str]] = {
         "storage_prefix": "存储前缀",
         "result_overview": "结果概览",
         "running_overview": "运行概览",
+        "state_overview": "状态概览",
+        "metadata_overview": "元数据概览",
         "running": "正在运行",
         "completed": "已成功完成",
         "failed": "失败",
         "success": "已完成",
         "failure": "失败",
-        "task_notification": "任务运行情况通知",
-        "task_completion_notification": "任务完成情况通知",
-        "task_failure_notification": "任务失败情况通知",
+        "task_notification": "作业运行情况通知",
+        "task_completion_notification": "作业完成情况通知",
+        "task_failure_notification": "作业失败情况通知",
         "no_description": "*No description provided*",
         "timestamp": "时间",
         "unknown_task": "未知任务",
         "return_code": "返回值",
-        "group": "任务组别",
+        "group": "归属组别",
+        # Workflow-specific translations
+        "network_submission_started": "网络提交已开始",
+        "network_submission_complete": "网络提交已完成",
+        "network_submission_failed": "网络提交失败",
+        "network_set_name": "网络集名称",
+        "network_type": "网络类型",
+        "expected_count": "预期数量",
+        "submitted_count": "提交总数",
+        "submitted": "已提交",
+        "config_uploaded": "配置已上传",
+        "config_name": "配置名称",
+        "files_uploaded": "已上传文件数",
+        "description": "配置描述",
+        "uploaded_files": "已上传文件的标签",
+        "task_submission_started": "任务提交已开始",
+        "task_submission_complete": "任务提交已完成",
+        "task_submission_failed": "任务提交失败",
+        "task_set_name": "任务集名称",
+        "iterations": "迭代次数",
+        "duration": "持续时间",
+        "submission_overview": "提交概览",
+        "status": "状态",
+        "successfully_completed": "已成功完成",
+        "submitted_before_failure": "失败前已提交",
+        "error_details": "错误详情",
+        "task_set_complete": "任务集已完成",
+        "task_set_failed": "任务集失败",
+        "task_set_progress": "任务集进度",
+        "task_set_count": "任务集数量",
+        "result_collection_started": "结果收集已开始",
+        "result_collection_complete": "结果收集已完成",
+        "task_sets": "任务集",
+        "rows": "行数",
+        "columns": "列数",
+        "comparison_complete": "比较已完成",
+        "comparison_name": "比较名称",
+        "task_sets_compared": "已比较任务集",
+        "common_networks": "公共网络数",
+        "result_rows": "结果行数",
+        "result_columns": "结果列数",
+        "comparison_results": "比较结果",
+        "total_items": "总项目数",
+        "summary": "摘要",
+        "items": "项目",
     },
     "en": {
-        "task_name": "Task Name",
+        "task_name": "Job Name",
         "start_time": "Start Time",
         "completion_time": "Completion Time",
-        "task_description": "Task Description",
+        "task_description": "Job Description",
         "estimated_duration": "Estimated Duration",
         "execution_duration": "Execution Duration",
         "execution_status": "Execution Status",
@@ -75,19 +121,65 @@ TRANSLATIONS: Dict[LanguageCode, Dict[str, str]] = {
         "storage_prefix": "Storage Prefix",
         "result_overview": "Result Overview",
         "running_overview": "Running Overview",
-        "running": "Running",
+        "state_overview": "State Overview",
+        "metadata_overview": "Metadata Overview",
+        "running": "Running Now",
         "completed": "Successfully Completed",
         "failed": "Failed",
         "success": "Completed",
         "failure": "Failed",
-        "task_notification": "Task Status Notification",
-        "task_completion_notification": "Task Completion Notification",
-        "task_failure_notification": "Task Failure Notification",
+        "task_notification": "Job Status Notification",
+        "task_completion_notification": "Job Completion Notification",
+        "task_failure_notification": "Job Failure Notification",
         "no_description": "*No description provided*",
         "timestamp": "Timestamp",
         "unknown_task": "Unknown Task",
         "return_code": "Return Status",
-        "group": "Task Group",
+        "group": "Group",
+        # Workflow-specific translations
+        "network_submission_started": "Network Submission Started",
+        "network_submission_complete": "Network Submission Complete",
+        "network_submission_failed": "Network Submission Failed",
+        "network_set_name": "Network Set Name",
+        "network_type": "Network Type",
+        "expected_count": "Expected Count",
+        "submitted_count": "Total Count Submitted",
+        "submitted": "Submitted",
+        "config_uploaded": "Configuration Uploaded",
+        "config_name": "Config Name",
+        "files_uploaded": "Files Uploaded",
+        "description": "Config Description",
+        "uploaded_files": "Labels of Uploaded Files",
+        "task_submission_started": "Task Submission Started",
+        "task_submission_complete": "Task Submission Complete",
+        "task_submission_failed": "Task Submission Failed",
+        "task_set_name": "Task Set Name",
+        "iterations": "Iterations",
+        "duration": "Duration",
+        "submission_overview": "Submission Overview",
+        "status": "Status",
+        "successfully_completed": "Successfully Completed",
+        "submitted_before_failure": "Submitted Before Failure",
+        "error_details": "Error Details",
+        "task_set_complete": "Task Set Complete",
+        "task_set_failed": "Task Set Failed",
+        "task_set_progress": "Task Set Progress",
+        "task_set_count": "Task Set Count",
+        "result_collection_started": "Result Collection Started",
+        "result_collection_complete": "Result Collection Complete",
+        "task_sets": "Task Sets",
+        "rows": "Rows",
+        "columns": "Columns",
+        "comparison_complete": "Comparison Complete",
+        "comparison_name": "Comparison Name",
+        "task_sets_compared": "Task Sets Compared",
+        "common_networks": "Common Networks",
+        "result_rows": "Result Rows",
+        "result_columns": "Result Columns",
+        "comparison_results": "Comparison Results",
+        "total_items": "Total Items",
+        "summary": "Summary",
+        "items": "Items",
     },
 }
 
@@ -813,3 +905,427 @@ class RawContentTemplate(LarkTemplate):
     def generate(self) -> CardContent:
         """Generate raw card content (passthrough)."""
         return self.card_content
+
+
+class GenericCardTemplate(LarkTemplate):
+    """Generic template built using CardBuilder.
+
+    This template wraps card content generated by the CardBuilder,
+    providing a flexible way to create custom card layouts.
+    """
+
+    def __init__(
+        self,
+        header_config: Optional[Dict[str, Any]] = None,
+        elements: Optional[list] = None,
+        language: LanguageCode = "zh",
+    ):
+        """Initialize generic card template.
+
+        Args:
+            header_config: Dictionary containing header configuration
+            elements: List of card elements/blocks
+            language: Display language code (default: "zh")
+        """
+        super().__init__(language)
+        self.header_config = header_config
+        self.elements = elements or []
+
+    def generate(self) -> CardContent:
+        """Generate card from builder configuration."""
+        hdr = None
+        if self.header_config:
+            hdr = make_header(**self.header_config)
+
+        cfg = config_textsize_normal_v2()
+        return make_card(elements=self.elements, header=hdr, schema="2.0", config=cfg)
+
+
+class CardBuilder:
+    """Flexible, fluent builder for creating Lark card templates.
+
+    The CardBuilder provides a chainable API for constructing card templates
+    with multiple blocks of any type. It supports both high-level convenience
+    methods and low-level block control for maximum flexibility.
+
+    Example usage:
+        >>> builder = (
+        ...     CardBuilder()
+        ...     .header("Task Results", status="success", color="green")
+        ...     .metadata("Task Name", task_name)
+        ...     .metadata("Duration", duration)
+        ...     .columns()
+        ...         .column("Group", group, width="auto")
+        ...         .column("Prefix", prefix, width="weighted")
+        ...         .end_columns()
+        ...     .collapsible("Details", details_text, expanded=False)
+        ...     .collapsible("Logs", log_text, expanded=False)
+        ... )
+        >>> template = builder.build()
+    """
+
+    def __init__(self, language: LanguageCode = "zh"):
+        """Initialize card builder.
+
+        Args:
+            language: Display language code (default: "zh")
+        """
+        self._header_config: Optional[Dict[str, Any]] = None
+        self._elements: list = []
+        self._column_stack: list = []
+        self._language = language
+
+    def _t(self, key: str) -> str:
+        """Get translation for the current builder language.
+
+        Args:
+            key: Translation key
+
+        Returns:
+            Translated string
+        """
+        return get_translation(key, self._language)
+
+    def language(self, lang: LanguageCode) -> "CardBuilder":
+        """Set the language for the builder.
+
+        Args:
+            lang: Language code ("zh" or "en")
+
+        Returns:
+            Self for chaining
+        """
+        self._language = lang
+        return self
+
+    def header(
+        self,
+        title: str,
+        status: Optional[str] = None,
+        color: Optional[ColorTheme] = None,
+        subtitle: Optional[str] = None,
+    ) -> "CardBuilder":
+        """Set the card header (only one header per card).
+
+        Args:
+            title: Header title text
+            status: Status tag text (e.g., "running", "success", "failed")
+            color: Header color theme
+            subtitle: Optional subtitle text
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.header("Task Complete", status="success", color="green")
+        """
+        text_tag_list = None
+        if status:
+            if color is None:
+                # Auto-detect color from status
+                status_color_map = {
+                    "running": "wathet",
+                    "success": "green",
+                    "submitted": "wathet",
+                    "completed": "green",
+                    "failed": "red",
+                    "error": "red",
+                    "warning": "orange",
+                    "info": "blue",
+                }
+                color = status_color_map.get(status.lower(), "blue")
+            text_tag_list = [text_tag(status, color)]
+
+        template_color = color or "blue"
+
+        self._header_config = {
+            "title": title,
+            "subtitle": subtitle or "",
+            "text_tag_list": text_tag_list,
+            "template": template_color,
+            "padding": "12px 8px 12px 8px",
+        }
+        return self
+
+    def metadata(
+        self, label: str, value: Any, translate_label: bool = False
+    ) -> "CardBuilder":
+        """Add a metadata row (can be called multiple times).
+
+        Args:
+            label: Metadata label/key
+            value: Metadata value (will be converted to string)
+            translate_label: If True, translate the label using _t()
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.metadata("Task Name", "my-task")
+            >>> builder.metadata("Duration", "5 minutes")
+        """
+        display_label = self._t(label) if translate_label else label
+        self._elements.append(
+            md(
+                f"**{display_label}:** {value}",
+                text_align="left",
+                text_size="normal",
+                margin="0px 0px 0px 0px",
+            )
+        )
+        return self
+
+    def metadata_block(self, **kwargs) -> "CardBuilder":
+        """Add multiple metadata fields as a single formatted block.
+
+        Args:
+            **kwargs: Key-value pairs for metadata fields
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.metadata_block(
+            ...     task_name="my-task",
+            ...     duration="5 minutes",
+            ...     status="completed"
+            ... )
+        """
+        lines = []
+        for key, value in kwargs.items():
+            # Convert snake_case to Title Case for display
+            display_key = key.replace("_", " ").title()
+            lines.append(f"**{display_key}:** {value}")
+
+        self._elements.append(
+            md(
+                "\n".join(lines),
+                text_align="left",
+                text_size="normal",
+                margin="0px 0px 0px 0px",
+            )
+        )
+        return self
+
+    def columns(self) -> "CardBuilder":
+        """Start a column set context.
+
+        After calling this, use .column() to add columns, then .end_columns()
+        to finalize the column set.
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.columns()
+            ...     .column("Left", "value1")
+            ...     .column("Right", "value2")
+            ...     .end_columns()
+        """
+        self._column_stack.append([])
+        return self
+
+    def column(
+        self,
+        label: str,
+        value: Any = None,
+        width: str = "auto",
+        weight: int = 1,
+    ) -> "CardBuilder":
+        """Add a column to the current column set.
+
+        Must be called after .columns() and before .end_columns().
+
+        Args:
+            label: Column header/label
+            value: Column content (optional, uses label if not provided)
+            width: Column width ("auto" or "weighted")
+            weight: Weight for "weighted" columns (default: 1)
+
+        Returns:
+            Self for chaining
+
+        Raises:
+            ValueError: If called without an active column set context
+        """
+        if not self._column_stack:
+            raise ValueError(
+                "Call .columns() before .column(). Example: builder.columns().column(...).end_columns()"
+            )
+
+        if value is not None:
+            col_content = md(
+                f"**{label}**\n{value}",
+                text_align="center",
+                text_size="normal_v2",
+                margin="0px 4px 0px 4px" if width == "auto" else "0px 0px 0px 0px",
+            )
+        else:
+            col_content = md(
+                label,
+                text_align="center",
+                text_size="normal_v2",
+                margin="0px 4px 0px 4px" if width == "auto" else "0px 0px 0px 0px",
+            )
+
+        column_block = col(
+            [col_content],
+            width=width,
+            vertical_spacing="8px",
+            horizontal_align="left",
+            vertical_align="top",
+            weight=weight if width == "weighted" else None,
+        )
+
+        self._column_stack[-1].append(column_block)
+        return self
+
+    def end_columns(
+        self,
+        background_style: str = "grey-100",
+        horizontal_spacing: str = "12px",
+    ) -> "CardBuilder":
+        """End the current column set context and add it to elements.
+
+        Args:
+            background_style: Background color for the column set
+            horizontal_spacing: Space between columns
+
+        Returns:
+            Self for chaining
+
+        Raises:
+            ValueError: If no column set context is active
+        """
+        if not self._column_stack:
+            raise ValueError("No column context to end. Use .columns() first.")
+
+        cols = self._column_stack.pop()
+        self._elements.append(
+            colset(
+                cols,
+                background_style=background_style,
+                horizontal_spacing=horizontal_spacing,
+                horizontal_align="left",
+                margin="0px 0px 0px 0px",
+            )
+        )
+        return self
+
+    def collapsible(
+        self,
+        title: str,
+        content: str,
+        expanded: bool = False,
+        title_color: str = "grey-800",
+    ) -> "CardBuilder":
+        """Add a collapsible panel (can be called multiple times).
+
+        Args:
+            title: Panel title text
+            content: Panel content (supports markdown)
+            expanded: Whether panel is initially expanded (default: False)
+            title_color: Color for the title text (default: "grey-800")
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.collapsible("Details", details_text, expanded=False)
+            >>> builder.collapsible("Logs", log_text, expanded=True)
+        """
+        self._elements.append(
+            panel(
+                f"**<font color='{title_color}'>{title}</font>**",
+                [
+                    md(
+                        content,
+                        text_align="left",
+                        text_size="normal_v2",
+                        margin="0px 0px 0px 0px",
+                    )
+                ],
+                expanded=expanded,
+            )
+        )
+        return self
+
+    def markdown(
+        self,
+        content: str,
+        text_align: str = "left",
+        text_size: str = "normal",
+    ) -> "CardBuilder":
+        """Add a markdown block (can be called multiple times).
+
+        Args:
+            content: Markdown content text
+            text_align: Text alignment ("left", "center", "right")
+            text_size: Text size ("normal", "normal_v2", etc.)
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> builder.markdown("## Section Title")
+            >>> builder.markdown("Some content here")
+        """
+        self._elements.append(
+            md(
+                content,
+                text_align=text_align,
+                text_size=text_size,
+                margin="0px 0px 0px 0px",
+            )
+        )
+        return self
+
+    def divider(self) -> "CardBuilder":
+        """Add a visual divider/separator line.
+
+        Returns:
+            Self for chaining
+        """
+        self._elements.append(md("---", text_align="left", text_size="normal"))
+        return self
+
+    def add_block(self, block: Dict[str, Any]) -> "CardBuilder":
+        """Add a raw block for maximum flexibility.
+
+        This allows you to add any custom block that you've built
+        using the blocks module functions directly.
+
+        Args:
+            block: Raw block dictionary from blocks module
+
+        Returns:
+            Self for chaining
+
+        Example:
+            >>> from lark_webhook_notify.blocks import markdown, column_set
+            >>> builder.add_block(markdown("Custom block"))
+            >>> builder.add_block(column_set([...]))
+        """
+        self._elements.append(block)
+        return self
+
+    def build(self) -> GenericCardTemplate:
+        """Build and return the final template.
+
+        Returns:
+            GenericCardTemplate instance ready to be sent
+
+        Raises:
+            ValueError: If column context is still open (forgot end_columns())
+        """
+        if self._column_stack:
+            raise ValueError(
+                f"Unclosed column context! You have {len(self._column_stack)} "
+                "open column set(s). Call .end_columns() to close them."
+            )
+
+        return GenericCardTemplate(
+            header_config=self._header_config,
+            elements=self._elements,
+            language=self._language,
+        )

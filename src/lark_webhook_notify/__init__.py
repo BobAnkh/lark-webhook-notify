@@ -9,6 +9,8 @@ from .templates import (
     SimpleMessageTemplate,
     AlertTemplate,
     RawContentTemplate,
+    GenericCardTemplate,
+    CardBuilder,
     CardContent,
     SeverityLevel,
     ColorTheme,
@@ -20,6 +22,10 @@ from .convenience import (
     send_task_start,
     send_task_result,
     send_task_failure,
+)
+from .workflow_templates import (
+    WorkflowTemplates,
+    create_custom_template,
 )
 
 __version__ = "0.1.0"
@@ -39,6 +45,12 @@ __all__ = [
     "SimpleMessageTemplate",
     "AlertTemplate",
     "RawContentTemplate",
+    "GenericCardTemplate",
+    # Builder
+    "CardBuilder",
+    # Workflow templates
+    "WorkflowTemplates",
+    "create_custom_template",
     # Convenience functions
     "send_task_notification",
     "send_alert",

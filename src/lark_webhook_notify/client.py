@@ -14,28 +14,46 @@ import time
 from typing import Optional, Dict, Any
 
 import httpx
+import colorlog
 
 from .config import LarkWebhookSettings, create_settings
 from .templates import LarkTemplate, CardContent
 
 
-def get_logger() -> logging.Logger:
+def get_logger(no_color: bool = False) -> logging.Logger:
     """Create and configure a logger for the notification client.
+
+    Args:
+        no_color: If True, disable colored output and use plain formatter
 
     Returns:
         Configured logger instance with console handler
 
     Note:
-        Logger is configured with INFO level by default. Only one handler
+        Logger is configured with WARNING level by default. Only one handler
         is added to prevent duplicate log messages. Logger propagation is
         disabled to prevent duplicate messages from parent loggers.
     """
-    formatter = logging.Formatter(
-        "%(asctime)s %(levelname)s %(name)s: %(message)s", datefmt="%Y-%m-%d %H:%M:%S"
-    )
+    if no_color:
+        formatter = logging.Formatter(
+            "%(asctime)s %(levelname)s %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+        )
+    else:
+        formatter = colorlog.ColoredFormatter(
+            "%(asctime)s %(log_color)s%(levelname)s%(log_color)s %(name)s: %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            log_colors={
+                "DEBUG": "cyan",
+                "INFO": "green",
+                "WARNING": "yellow",
+                "ERROR": "red",
+                "CRITICAL": "red,bg_white",
+            },
+        )
 
     logger = logging.getLogger("lark-webhook-notify")
-    logger.setLevel(logging.INFO)
+    logger.setLevel(logging.WARNING)
 
     # Only add handler if it doesn't already exist
     if not logger.handlers:
@@ -103,6 +121,7 @@ class LarkWebhookNotifier:
         toml_file: Optional[str] = None,
         webhook_url: Optional[str] = None,
         webhook_secret: Optional[str] = None,
+        no_color: bool = False,
     ):
         """Initialize the notifier with configuration.
 
@@ -140,7 +159,7 @@ class LarkWebhookNotifier:
         self.webhook_url = new_webhook_url
         self.webhook_secret = new_webhook_secret
 
-        self.logger = get_logger()
+        self.logger = get_logger(no_color=no_color)
         # Configure HTTP client with reasonable timeout and retry behavior
         self.client = httpx.Client()
 

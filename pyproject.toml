@@ -6,6 +6,7 @@ readme = "README.md"
 authors = [{ name = "BobAnkh", email = "bobankhshen@gmail.com" }]
 requires-python = ">=3.10"
 dependencies = [
+  "colorlog>=6.10.1",
   "httpx>=0.28.1",
   "pydantic>=2.11.7",
   "pydantic-settings>=2.10.1",
